@@ -1,0 +1,53 @@
+{
+  "name": "urlhaus-mcp-server",
+  "version": "1.0.0",
+  "description": "MCP server for accessing URLhaus malicious URL database from abuse.ch - provides threat intelligence for cybersecurity research",
+  "type": "module",
+  "bin": {
+    "urlhaus-mcp-server": "./build/index.js"
+  },
+  "files": [
+    "build"
+  ],
+  "scripts": {
+    "build": "tsc && node -e \"require('fs').chmodSync('build/index.js', '755')\"",
+    "prepare": "npm run build",
+    "watch": "tsc --watch",
+    "inspector": "npx @modelcontextprotocol/inspector build/index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "0.6.0",
+    "axios": "^1.9.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.24",
+    "typescript": "^5.3.3"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "urlhaus",
+    "malware",
+    "threat-intelligence",
+    "cybersecurity",
+    "security-research",
+    "malicious-urls",
+    "abuse-ch",
+    "ioc",
+    "indicators-of-compromise",
+    "threat-hunting"
+  ],
+  "author": "Cyreslab AI <info@cyreslab.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Cyreslab-AI/urlhaus-mcp-server.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Cyreslab-AI/urlhaus-mcp-server/issues"
+  },
+  "homepage": "https://github.com/Cyreslab-AI/urlhaus-mcp-server#readme",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
