@@ -16,12 +16,12 @@
     "inspector": "npx @modelcontextprotocol/inspector build/index.js"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "0.6.0",
-    "axios": "^1.9.0"
+    "@modelcontextprotocol/server": "^2.0.0",
+    "axios": "^1.20.0"
   },
   "devDependencies": {
-    "@types/node": "^20.11.24",
-    "typescript": "^5.3.3"
+    "@types/node": "^24.13.5",
+    "typescript": "^5.9.3"
   },
   "keywords": [
     "mcp",
@@ -48,6 +48,6 @@
   },
   "homepage": "https://github.com/Cyreslab-AI/urlhaus-mcp-server#readme",
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=20"
   }
 }
