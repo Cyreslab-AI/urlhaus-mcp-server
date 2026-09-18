@@ -140,6 +140,16 @@ class URLhausServer {
               },
             },
           },
+          outputSchema: {
+            type: "object",
+            properties: {
+              query_status: { type: "string" },
+              urls_count: { type: "number" },
+              urls: { type: "array", items: { type: "object" } },
+              summary: { type: "string" },
+            },
+            required: ["query_status", "urls_count", "urls", "summary"],
+          },
           annotations: { readOnlyHint: true, openWorldHint: true },
         },
         {
@@ -155,6 +165,15 @@ class URLhausServer {
               },
             },
             required: ["url"],
+          },
+          outputSchema: {
+            type: "object",
+            properties: {
+              query_status: { type: "string" },
+              url_info: { type: "object" },
+              summary: { type: "string" },
+            },
+            required: ["query_status", "url_info", "summary"],
           },
           annotations: { readOnlyHint: true, openWorldHint: true },
         },
@@ -173,6 +192,16 @@ class URLhausServer {
             },
             required: ["host"],
           },
+          outputSchema: {
+            type: "object",
+            properties: {
+              query_status: { type: "string" },
+              host_info: { type: "object" },
+              urls_count: { type: "number" },
+              summary: { type: "string" },
+            },
+            required: ["query_status", "host_info", "urls_count", "summary"],
+          },
           annotations: { readOnlyHint: true, openWorldHint: true },
         },
 
@@ -188,6 +217,15 @@ class URLhausServer {
               },
             },
             required: ["hash"],
+          },
+          outputSchema: {
+            type: "object",
+            properties: {
+              query_status: { type: "string" },
+              payload_info: { type: "object" },
+              summary: { type: "string" },
+            },
+            required: ["query_status", "payload_info", "summary"],
           },
           annotations: { readOnlyHint: true, openWorldHint: true },
         },
@@ -212,6 +250,17 @@ class URLhausServer {
             },
             required: ["tag"],
           },
+          outputSchema: {
+            type: "object",
+            properties: {
+              query_status: { type: "string" },
+              tag: { type: "string" },
+              urls_count: { type: "number" },
+              urls: { type: "array", items: { type: "object" } },
+              summary: { type: "string" },
+            },
+            required: ["query_status", "tag", "urls_count", "urls", "summary"],
+          },
           annotations: { readOnlyHint: true, openWorldHint: true },
         },
         {
@@ -234,6 +283,23 @@ class URLhausServer {
             },
             required: ["signature"],
           },
+          outputSchema: {
+            type: "object",
+            properties: {
+              query_status: { type: "string" },
+              signature: { type: "string" },
+              urls_count: { type: "number" },
+              urls: { type: "array", items: { type: "object" } },
+              summary: { type: "string" },
+            },
+            required: [
+              "query_status",
+              "signature",
+              "urls_count",
+              "urls",
+              "summary",
+            ],
+          },
           annotations: { readOnlyHint: true, openWorldHint: true },
         },
         {
@@ -250,6 +316,21 @@ class URLhausServer {
                 maximum: 1000,
               },
             },
+          },
+          outputSchema: {
+            type: "object",
+            properties: {
+              query_status: { type: "string" },
+              payloads_count: { type: "number" },
+              payloads: { type: "array", items: { type: "object" } },
+              summary: { type: "string" },
+            },
+            required: [
+              "query_status",
+              "payloads_count",
+              "payloads",
+              "summary",
+            ],
           },
           annotations: { readOnlyHint: true, openWorldHint: true },
         },
@@ -326,22 +407,21 @@ class URLhausServer {
 
     const data = response.data;
 
+    const result = {
+      query_status: data.query_status,
+      urls_count: data.urls?.length || 0,
+      urls: data.urls?.slice(0, limit) || [],
+      summary: `Retrieved ${data.urls?.length || 0} recent malicious URLs`,
+    };
+
     return {
       content: [
         {
           type: "text",
-          text: JSON.stringify(
-            {
-              query_status: data.query_status,
-              urls_count: data.urls?.length || 0,
-              urls: data.urls?.slice(0, limit) || [],
-              summary: `Retrieved ${data.urls?.length || 0} recent malicious URLs`,
-            },
-            null,
-            2,
-          ),
+          text: JSON.stringify(result, null, 2),
         },
       ],
+      structuredContent: result,
     };
   }
 
@@ -361,24 +441,23 @@ class URLhausServer {
     const response = await this.axiosInstance.post("/url/", formData);
     const data = response.data;
 
+    const result = {
+      query_status: data.query_status,
+      url_info: data,
+      summary:
+        data.query_status === "ok"
+          ? `URL found in URLhaus database`
+          : `URL not found in URLhaus database`,
+    };
+
     return {
       content: [
         {
           type: "text",
-          text: JSON.stringify(
-            {
-              query_status: data.query_status,
-              url_info: data,
-              summary:
-                data.query_status === "ok"
-                  ? `URL found in URLhaus database`
-                  : `URL not found in URLhaus database`,
-            },
-            null,
-            2,
-          ),
+          text: JSON.stringify(result, null, 2),
         },
       ],
+      structuredContent: result,
     };
   }
 
@@ -398,25 +477,24 @@ class URLhausServer {
     const response = await this.axiosInstance.post("/host/", formData);
     const data = response.data;
 
+    const result = {
+      query_status: data.query_status,
+      host_info: data,
+      urls_count: data.urls?.length || 0,
+      summary:
+        data.query_status === "ok"
+          ? `Found ${data.urls?.length || 0} URLs for host ${host}`
+          : `No data found for host ${host}`,
+    };
+
     return {
       content: [
         {
           type: "text",
-          text: JSON.stringify(
-            {
-              query_status: data.query_status,
-              host_info: data,
-              urls_count: data.urls?.length || 0,
-              summary:
-                data.query_status === "ok"
-                  ? `Found ${data.urls?.length || 0} URLs for host ${host}`
-                  : `No data found for host ${host}`,
-            },
-            null,
-            2,
-          ),
+          text: JSON.stringify(result, null, 2),
         },
       ],
+      structuredContent: result,
     };
   }
 
@@ -436,24 +514,23 @@ class URLhausServer {
     const response = await this.axiosInstance.post("/payload/", formData);
     const data = response.data;
 
+    const result = {
+      query_status: data.query_status,
+      payload_info: data,
+      summary:
+        data.query_status === "ok"
+          ? `Payload found in URLhaus database`
+          : `Payload not found in URLhaus database`,
+    };
+
     return {
       content: [
         {
           type: "text",
-          text: JSON.stringify(
-            {
-              query_status: data.query_status,
-              payload_info: data,
-              summary:
-                data.query_status === "ok"
-                  ? `Payload found in URLhaus database`
-                  : `Payload not found in URLhaus database`,
-            },
-            null,
-            2,
-          ),
+          text: JSON.stringify(result, null, 2),
         },
       ],
+      structuredContent: result,
     };
   }
 
@@ -475,23 +552,22 @@ class URLhausServer {
     const response = await this.axiosInstance.post("/tag/", formData);
     const data = response.data;
 
+    const result = {
+      query_status: data.query_status,
+      tag: tag,
+      urls_count: data.urls?.length || 0,
+      urls: data.urls?.slice(0, limit) || [],
+      summary: `Found ${data.urls?.length || 0} URLs tagged with "${tag}"`,
+    };
+
     return {
       content: [
         {
           type: "text",
-          text: JSON.stringify(
-            {
-              query_status: data.query_status,
-              tag: tag,
-              urls_count: data.urls?.length || 0,
-              urls: data.urls?.slice(0, limit) || [],
-              summary: `Found ${data.urls?.length || 0} URLs tagged with "${tag}"`,
-            },
-            null,
-            2,
-          ),
+          text: JSON.stringify(result, null, 2),
         },
       ],
+      structuredContent: result,
     };
   }
 
@@ -513,23 +589,22 @@ class URLhausServer {
     const response = await this.axiosInstance.post("/signature/", formData);
     const data = response.data;
 
+    const result = {
+      query_status: data.query_status,
+      signature: signature,
+      urls_count: data.urls?.length || 0,
+      urls: data.urls?.slice(0, limit) || [],
+      summary: `Found ${data.urls?.length || 0} URLs with signature "${signature}"`,
+    };
+
     return {
       content: [
         {
           type: "text",
-          text: JSON.stringify(
-            {
-              query_status: data.query_status,
-              signature: signature,
-              urls_count: data.urls?.length || 0,
-              urls: data.urls?.slice(0, limit) || [],
-              summary: `Found ${data.urls?.length || 0} URLs with signature "${signature}"`,
-            },
-            null,
-            2,
-          ),
+          text: JSON.stringify(result, null, 2),
         },
       ],
+      structuredContent: result,
     };
   }
 
@@ -542,22 +617,21 @@ class URLhausServer {
 
     const data = response.data;
 
+    const result = {
+      query_status: data.query_status,
+      payloads_count: data.payloads?.length || 0,
+      payloads: data.payloads?.slice(0, limit) || [],
+      summary: `Retrieved ${data.payloads?.length || 0} recent malware payloads`,
+    };
+
     return {
       content: [
         {
           type: "text",
-          text: JSON.stringify(
-            {
-              query_status: data.query_status,
-              payloads_count: data.payloads?.length || 0,
-              payloads: data.payloads?.slice(0, limit) || [],
-              summary: `Retrieved ${data.payloads?.length || 0} recent malware payloads`,
-            },
-            null,
-            2,
-          ),
+          text: JSON.stringify(result, null, 2),
         },
       ],
+      structuredContent: result,
     };
   }
 
