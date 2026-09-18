@@ -15,8 +15,11 @@
  * - Payload Info: Get information about malware payloads
  * - Tag Info: Get URLs associated with specific tags
  *
- * The URLhaus API is free to use and doesn't require authentication,
- * but has rate limits to prevent abuse.
+ * As of abuse.ch's "Community First" changes (effective 2025-06-30), every
+ * request to the URLhaus API must include an `Auth-Key` HTTP header. Get a
+ * free key at https://auth.abuse.ch/. This server reads the key from the
+ * URLHAUS_AUTH_KEY environment variable and refuses to start without it,
+ * since every tool this server exposes depends on it.
  */
 
 import { StdioServerTransport } from "@modelcontextprotocol/server/stdio";
@@ -26,6 +29,20 @@ import {
   ProtocolErrorCode,
 } from "@modelcontextprotocol/server";
 import axios, { AxiosInstance } from "axios";
+
+// abuse.ch made the Auth-Key header mandatory across all of its APIs
+// (URLhaus, MalwareBazaar, ThreatFox) as part of the "Community First"
+// changes effective 2025-06-30. Every tool in this server calls the
+// URLhaus API, so there is no useful degraded mode without a key -
+// fail fast at startup rather than let every tool call fail later.
+// Get a free key at https://auth.abuse.ch/.
+const AUTH_KEY = process.env.URLHAUS_AUTH_KEY;
+if (!AUTH_KEY) {
+  throw new Error(
+    "URLHAUS_AUTH_KEY environment variable is required. " +
+      "Get a free Auth-Key at https://auth.abuse.ch/ and set it before starting this server.",
+  );
+}
 
 interface URLhausURL {
   id: string;
@@ -90,6 +107,7 @@ class URLhausServer {
       headers: {
         "User-Agent": "URLhaus-MCP-Server/0.1.0",
         "Content-Type": "application/x-www-form-urlencoded",
+        "Auth-Key": AUTH_KEY,
       },
     });
 
@@ -122,6 +140,7 @@ class URLhausServer {
               },
             },
           },
+          annotations: { readOnlyHint: true, openWorldHint: true },
         },
         {
           name: "lookup_url",
@@ -137,6 +156,7 @@ class URLhausServer {
             },
             required: ["url"],
           },
+          annotations: { readOnlyHint: true, openWorldHint: true },
         },
         {
           name: "lookup_host",
@@ -153,6 +173,7 @@ class URLhausServer {
             },
             required: ["host"],
           },
+          annotations: { readOnlyHint: true, openWorldHint: true },
         },
 
         {
@@ -168,6 +189,7 @@ class URLhausServer {
             },
             required: ["hash"],
           },
+          annotations: { readOnlyHint: true, openWorldHint: true },
         },
         {
           name: "get_urls_by_tag",
@@ -190,6 +212,7 @@ class URLhausServer {
             },
             required: ["tag"],
           },
+          annotations: { readOnlyHint: true, openWorldHint: true },
         },
         {
           name: "get_urls_by_signature",
@@ -211,6 +234,7 @@ class URLhausServer {
             },
             required: ["signature"],
           },
+          annotations: { readOnlyHint: true, openWorldHint: true },
         },
         {
           name: "get_payloads",
@@ -227,6 +251,7 @@ class URLhausServer {
               },
             },
           },
+          annotations: { readOnlyHint: true, openWorldHint: true },
         },
       ],
     }));

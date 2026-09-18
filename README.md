@@ -53,6 +53,15 @@ npm install -g urlhaus-mcp-server
 
 ## Configuration
 
+### Auth-Key (required)
+
+As of abuse.ch's "Community First" changes (effective 2025-06-30), every
+request to the URLhaus API must carry an `Auth-Key` HTTP header. Without
+it, the API rejects requests. Get a free key at
+[auth.abuse.ch](https://auth.abuse.ch/), then set it as the
+`URLHAUS_AUTH_KEY` environment variable. This server will not start
+without it.
+
 Add the server to your MCP settings configuration:
 
 ```json
@@ -60,13 +69,14 @@ Add the server to your MCP settings configuration:
   "mcpServers": {
     "urlhaus": {
       "command": "node",
-      "args": ["/path/to/urlhaus-mcp-server/build/index.js"]
+      "args": ["/path/to/urlhaus-mcp-server/build/index.js"],
+      "env": {
+        "URLHAUS_AUTH_KEY": "your-auth-key-here"
+      }
     }
   }
 }
 ```
-
-No API keys or authentication are required as URLhaus provides a free public API.
 
 ## Usage Examples
 
